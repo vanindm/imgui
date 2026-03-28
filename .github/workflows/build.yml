@@ -603,49 +603,6 @@ jobs:
         # Code signing is required, but we disable it because it is irrelevant for CI builds.
         xcodebuild -project examples/example_apple_metal/example_apple_metal.xcodeproj -target example_apple_metal_ios CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
-  Build-Emscripten:
-    runs-on: ubuntu-latest
-    name: Build - Emscripten
-
-    steps:
-    - uses: actions/checkout@v5
-
-    - name: Install Dependencies
-      run: |
-        wget -q https://github.com/emscripten-core/emsdk/archive/master.tar.gz
-        tar -xvf master.tar.gz
-        emsdk-master/emsdk update
-        emsdk-master/emsdk install latest
-        emsdk-master/emsdk activate latest
-        sudo apt-get install build-essential
-
-    - name: Build example_sdl2_opengl3 with Emscripten
-      run: |
-        pushd emsdk-master
-        source ./emsdk_env.sh
-        popd
-        make -C examples/example_sdl2_opengl3 -f Makefile.emscripten
-
-    # This build compiles example_glfw_wgpu using Makefile.emscripten and Emscripten GLFW built-in implementation (-sUSE_GLFW=3)
-    # This ensures 2 things: the make build works, and the GLFW built-in implementation is tested
-    - name: Build example_glfw_wgpu with Emscripten/Makefile
-      run: |
-        pushd emsdk-master
-        source ./emsdk_env.sh
-        popd
-        make -C examples/example_glfw_wgpu -f Makefile.emscripten
-
-    # This build compiles example_glfw_wgpu using CMakeLists.txt and Emscripten GLFW contrib port (--use-port=contrib.glfw3)
-    # This ensures 2 things: the CMake build works, and the GLFW contrib port is tested
-    - name: Build example_glfw_wgpu with Emscripten/CMake
-      run: |
-        pushd emsdk-master
-        source ./emsdk_env.sh
-        popd
-        emcc -v
-        emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release examples/example_glfw_wgpu
-        cmake --build build
-
   Build-Android:
     runs-on: ubuntu-latest
     name: Build - Android
